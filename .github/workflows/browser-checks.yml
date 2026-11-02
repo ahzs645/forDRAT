@@ -25,5 +25,6 @@ jobs:
       - run: npm run check
         working-directory: web
       - name: Verify reproducible committed browser output
-        run: git diff --exit-code -- docs
+        run: |
+          git diff --exit-code -- docs
           test -z "$(git ls-files --others --exclude-standard docs)"
