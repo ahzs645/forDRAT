@@ -17,6 +17,7 @@ const status = $('status')
 let dataset = null
 let manifest = null
 let selection = null
+let activeLoad = null
 
 function element(name, text, className) {
   const node = document.createElement(name)
@@ -177,9 +178,19 @@ function download(text, filename, mime) {
 }
 
 async function loadDataset() {
+  activeLoad?.abort()
+  const controller = new AbortController()
+  activeLoad = controller
+  let timedOut = false
+  const timeout = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, 30_000)
   dataset = null
   manifest = null
   clearSelection()
+  bgcSelect.replaceChildren(new Option('Select a BGC unit', ''))
+  soilSelect.replaceChildren(new Option('Select the assessed soil regime', ''))
   bgcSelect.disabled = true
   soilSelect.disabled = true
   $('compare').disabled = true
@@ -187,8 +198,8 @@ async function loadDataset() {
   showStatus('Loading the published dataset…')
   try {
     const [csvResponse, manifestResponse] = await Promise.all([
-      fetch('./data/forest-drought/fordrat.csv'),
-      fetch('./data/forest-drought/manifest.json'),
+      fetch('./data/forest-drought/fordrat.csv', { signal: controller.signal }),
+      fetch('./data/forest-drought/manifest.json', { signal: controller.signal }),
     ])
     if (!csvResponse.ok || !manifestResponse.ok) throw new Error('The published source files could not be loaded.')
     const [csvBytes, sourceManifest] = await Promise.all([csvResponse.arrayBuffer(), manifestResponse.json()])
@@ -202,6 +213,8 @@ async function loadDataset() {
       if (checksum !== PUBLISHED_SOURCE.sha256) throw new Error('The published CSV checksum does not match this release.')
     }
     const parsed = parsePublishedCsv(new TextDecoder().decode(csvBytes))
+    if (activeLoad !== controller) return
+    if (timedOut) throw new Error('Source loading exceeded the time limit.')
     manifest = sourceManifest
     dataset = parsed
     bgcSelect.replaceChildren(new Option('Select a BGC unit', ''), ...parsed.bgcUnits.map((unit) => new Option(unit, unit)))
@@ -218,8 +231,15 @@ async function loadDataset() {
       ? 'Review the selection supplied in this link, including the soil regime, then compare periods.'
       : 'Published dataset ready. Select a BGC unit and assessed soil regime to begin.')
   } catch (error) {
-    showStatus(`${error instanceof Error ? error.message : 'Unable to load the source data.'} Use an HTTP server or the hosted browser app.`, true)
+    if (activeLoad !== controller) return
+    controller.abort()
+    showStatus(timedOut
+      ? 'The published data did not load within 30 seconds. Check your connection and retry.'
+      : `${error instanceof Error ? error.message : 'Unable to load the source data.'} Use an HTTP server or the hosted browser app.`, true)
     $('retry').hidden = false
+  } finally {
+    clearTimeout(timeout)
+    if (activeLoad === controller) activeLoad = null
   }
 }
 
