@@ -1,0 +1,15 @@
+{
+  "name": "@pgmaps/fordrat-browser",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Static client-side explorer for the published BC forDRAT table",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

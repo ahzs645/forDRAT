@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Explore published BC forDRAT drought-risk estimates by BEC v11 unit, soil moisture regime, species and climate period. Runs entirely in your browser." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; object-src 'none'" />
+    <title>Forest drought risk · forDRAT browser</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./app.mjs"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#site-form">Skip to site selection</a>
+    <header class="hero">
+      <div class="container">
+        <div class="eyebrow">BC FOREST DROUGHT RISK <span class="local-badge">Runs in your browser</span></div>
+        <h1>A clearer view of forest drought risk.</h1>
+        <p class="lead">Compare the published forDRAT estimates across ten tree species and six climate periods. Start with a BEC v11 unit and the site's relative soil moisture regime.</p>
+        <p class="source-line">An independent browser extension of the Province of British Columbia's published dataset.</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel setup" aria-labelledby="select-heading">
+        <div>
+          <p class="section-kicker">01 / SELECT A SITE CONTEXT</p>
+          <h2 id="select-heading">Which forest conditions?</h2>
+          <p class="muted">Choose the complete BGC identifier. A location alone does not establish soil moisture regime.</p>
+        </div>
+        <form id="site-form">
+          <div class="fields">
+            <div class="field">
+              <label for="bgc">BEC v11 unit</label>
+              <select id="bgc" name="bgc" required disabled aria-describedby="bgc-help"><option value="">Select a BGC unit</option></select>
+              <p class="help" id="bgc-help">Exact published unit, including variant and suffix.</p>
+            </div>
+            <div class="field">
+              <label for="soil">Relative soil moisture regime</label>
+              <select id="soil" name="soil" required disabled aria-describedby="soil-help"><option value="">Select the assessed soil regime</option></select>
+              <p class="help" id="soil-help">Use a site assessment; wetter than subhygric is outside this model.</p>
+            </div>
+          </div>
+          <button id="compare" type="submit" disabled>Compare climate periods <span aria-hidden="true">→</span></button>
+        </form>
+        <p id="status" class="status" role="status" aria-live="polite">Loading the published dataset…</p>
+        <button id="retry" class="secondary" type="button" hidden>Retry loading data</button>
+      </section>
+
+      <aside class="scope-note" aria-label="Model scope">
+        <strong>Mature forests · interior species · BEC v11</strong>
+        <p>These estimates concern drought-related mortality. A low risk rating does not establish that a species occurs here or is suitable for planting. The projections describe climate periods, not current drought conditions.</p>
+      </aside>
+
+      <section id="results" aria-labelledby="results-heading" hidden>
+        <div class="results-heading">
+          <div>
+            <p class="section-kicker">02 / COMPARE PUBLISHED RESULTS</p>
+            <h2 id="results-heading"></h2>
+            <p id="selection-caption" class="muted"></p>
+          </div>
+          <div class="actions">
+            <button id="download-csv" class="secondary" type="button">Download selected CSV</button>
+            <button id="download-metadata" class="secondary" type="button">Download source metadata</button>
+          </div>
+        </div>
+
+        <section class="panel chart-panel" aria-labelledby="chart-heading">
+          <div class="chart-intro">
+            <div><h3 id="chart-heading">Water availability across climate periods</h3><p class="muted">Published mean annual ratio of actual to potential evapotranspiration (AET/PET).</p></div>
+            <div class="period-legend" aria-label="Period types"><span><i class="dot historical" aria-hidden="true"></i>Historical</span><span><i class="dot projection" aria-hidden="true"></i>Projection</span></div>
+          </div>
+          <figure>
+            <div id="chart" class="chart"></div>
+            <figcaption>Higher AET/PET indicates a greater share of evaporative demand met by available water. The horizontal axis compares named climate periods; historical windows overlap. Projections use ClimateBC 6.21, RCP 4.5, a 15-model ensemble.</figcaption>
+          </figure>
+          <div class="table-scroll ratio-table"><table id="ratio-table"><caption>Exact published AET/PET values</caption></table></div>
+        </section>
+
+        <section class="panel species-panel" aria-labelledby="species-heading">
+          <div class="chart-intro"><div><h3 id="species-heading">Species drought risk</h3><p class="muted">Every cell retains the published risk classification. This table does not assess species suitability.</p></div></div>
+          <div id="risk-legend" class="risk-legend" aria-label="Risk classifications"></div>
+          <div class="table-scroll" tabindex="0" aria-label="Species risk table; scroll horizontally to compare all periods"><table id="species-table"><caption>Drought-related mortality risk by species and climate period</caption></table></div>
+          <p class="table-note">The source supplies ratings for every species in every BGC unit, including outside its natural range. Young stands, regeneration performance and wetter soil regimes are not evaluated here.</p>
+        </section>
+      </section>
+
+      <section class="panel provenance" aria-labelledby="source-heading">
+        <h2 id="source-heading">Published evidence, with the source intact</h2>
+        <p>6,120 records cover 204 BGC units, five soil moisture regimes, six periods and ten species. The CSV is retained unchanged. Selection, charts and downloads are generated locally after the static assets load.</p>
+        <div class="source-links">
+          <a href="./data/forest-drought/fordrat.csv" download="forDRAT-original-published.csv">Original CSV</a>
+          <a href="./data/forest-drought/manifest.json" download="forDRAT-source-manifest.json">Source manifest</a>
+          <a href="https://github.com/bcgov/forDRAT/blob/ac51aafe7b66d039c990964a9acd809a2ea73848/README.md" target="_blank" rel="noopener noreferrer">Upstream documentation ↗</a>
+          <a href="https://www.for.gov.bc.ca/hfd/pubs/Docs/Tr/TR125.pdf" target="_blank" rel="noopener noreferrer">Model technical report ↗</a>
+        </div>
+        <details>
+          <summary>Scope, version and attribution</summary>
+          <p>BGC identifiers refer to BEC v11. Matching labels in a later map version do not verify matching boundaries. This browser uses exact identifiers and does not assign a soil moisture regime from map location.</p>
+          <p>The 2020, 2050 and 2080 projections represent 2011–2040, 2041–2070 and 2071–2100. The original README omits the CSV's 1971–2000 period and inconsistently labels the final projection 2070. This browser preserves the actual six CSV labels.</p>
+          <p>The published forDRAT table is distinct from the older forestDroughtTool R calculator. No legacy model has been used to recalculate these published results.</p>
+          <p>Source commit: <code>ac51aafe7b66d039c990964a9acd809a2ea73848</code></p>
+          <p>Copyright 2024 Province of British Columbia. Source repository licence: <a href="./data/forest-drought/LICENSE-fordrat.md">Apache 2.0</a>. <a href="./data/forest-drought/NOTICE.md">Attribution and interpretation notice</a>.</p>
+        </details>
+      </section>
+    </main>
+    <footer class="container"><p>forDRAT browser · Published data exploration · <a href="https://github.com/ahzs645/forDRAT">Browser fork source</a></p></footer>
+    <noscript><p class="noscript">Enable JavaScript to compare periods. The original CSV and source manifest links remain available.</p></noscript>
+  </body>
+</html>

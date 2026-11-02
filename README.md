@@ -1,3 +1,15 @@
+# forDRAT · Browser edition
+
+This fork adds a static browser explorer while retaining the published data and original documentation below.
+
+- [Open the browser explorer](https://ahzs645.github.io/forDRAT/)
+- [Browser source, setup, and validation](web/README.md)
+- [Separate legacy model calculator](https://github.com/ahzs645/forestDroughtTool)
+
+Select a BEC v11 unit and a site-assessed soil moisture regime to compare all six periods and ten species. Published ratios and risk ratings remain unchanged. No account, API key, application server, or runtime package download is required.
+
+---
+
 ```{=html}
 <!--
 Copyright 2024 Province of British Columbia
